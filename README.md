@@ -83,6 +83,32 @@ python orange_clicker.py
 
 ---
 
+## 🗺️ Roadmap
+
+### 🎨 Interface
+- [ ] **Dark mode** — thème sombre optionnel
+- [ ] **Overlay de prévisualisation** — afficher en temps réel les contours des cibles détectées (rectangle vert)
+- [ ] **Historique des sessions** — tableau récapitulatif : clics, CPM moyen, durée, taux de réussite
+- [ ] **Profils sauvegardables** — sauvegarder/charger un ensemble couleur + zone + paramètres dans un fichier JSON
+
+### 🎯 Détection
+- [ ] **Multi-couleurs** — détecter et cliquer sur plusieurs couleurs en parallèle
+- [ ] **Priorité de clic** — choisir l'ordre : cible la plus proche du curseur, la plus grande, ou la plus haute
+- [ ] **Filtre de forme** — exclure les formes non rondes (rectangles, lignes...)
+
+### 🤖 Comportement naturel
+- [ ] **Variation de cadence** — CPM flottant (ex : 120 ±20%) pour éviter des intervalles trop réguliers
+- [ ] **Micro-déplacement aléatoire** — déplacer légèrement le curseur autour de la cible avant de cliquer
+- [ ] **Délai de démarrage** — countdown configurable avant l'activation (laisser le temps de basculer dans le jeu)
+- [ ] **Pause aléatoire** — insérer de courtes pauses spontanées pour simuler une distraction
+
+### 🛠️ Technique
+- [ ] **Packaging `.exe`** — distribuer un exécutable standalone via PyInstaller (sans Python requis)
+- [ ] **Support multi-écrans** — choisir sur quel moniteur chercher les cibles
+- [ ] **Mode CLI** — lancer sans interface graphique via arguments en ligne de commande
+
+---
+
 ## ⚙️ Dépendances
 
 | Package | Rôle |
