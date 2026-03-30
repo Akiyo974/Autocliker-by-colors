@@ -24,6 +24,9 @@ Options activables (section Options) :
     • Pauses aléatoires          — pauses courtes et imprévisibles entre les clics
 """
 
+import argparse
+import signal
+import sys
 import time
 import random
 import threading
@@ -779,7 +782,211 @@ class App(tk.Tk):
             self._set_status("Arrêt demandé…")
 
 
+# ── Mode CLI ──────────────────────────────────────────────────────────────────
+
+class CliConfig:
+    """Remplace App pour le mode ligne de commande (sans interface graphique)."""
+
+    def __init__(self, colors, cpm, miss, cooldown, radius, timer,
+                 jitter, start_delay, cpm_variation, random_pauses):
+        self._colors        = colors          # [(rgb, tol_h, tol_sv), ...]
+        self._cpm           = cpm
+        self._miss          = miss            # 0-100
+        self._cooldown      = cooldown        # ms
+        self._radius        = radius
+        self._timer         = timer           # secondes, 0 = infini
+        self._jitter        = jitter          # px, 0 = désactivé
+        self._start_delay   = start_delay     # secondes
+        self._cpm_variation = cpm_variation
+        self._random_pauses = random_pauses
+
+    def get_active_colors(self):  return self._colors
+    def get_min_radius(self):     return self._radius
+    def get_cpm(self):            return self._cpm
+    def get_miss_rate(self):      return self._miss / 100.0
+    def get_timer_enabled(self):  return self._timer > 0
+    def get_timer_seconds(self):  return self._timer
+    def get_cooldown(self):       return self._cooldown / 1000.0
+    def get_opt(self, key: str):  return {
+        "preview":       False,
+        "cpm_variation": self._cpm_variation,
+        "jitter":        self._jitter > 0,
+        "start_delay":   self._start_delay > 0,
+        "random_pauses": self._random_pauses,
+    }[key]
+    def get_jitter_px(self):      return self._jitter
+    def get_start_delay(self):    return self._start_delay
+
+    def after(self, _ms, fn=None):
+        if fn is not None:
+            fn()
+
+    def _set_status(self, msg: str):
+        print(f"\r[•] {msg:<60}", end="", flush=True)
+
+    def on_clicker_stopped(self, total: int, cps: float):
+        global running
+        running = False
+        print(f"\n[✓] Terminé — {total} clics  ({cps:.1f} clics/s)")
+
+
+def _parse_color(raw: str, default_tol_h: int, default_tol_sv: int):
+    """Parse RRGGBB[:tol_h[:tol_sv]] → ((r,g,b), tol_h, tol_sv)."""
+    parts = raw.lstrip("#").split(":")
+    hex_c = parts[0].upper()
+    if len(hex_c) != 6:
+        raise argparse.ArgumentTypeError(
+            f"Couleur invalide '{raw}' — attendu RRGGBB (ex: FF8C00)")
+    r, g, b = int(hex_c[0:2], 16), int(hex_c[2:4], 16), int(hex_c[4:6], 16)
+    tol_h  = int(parts[1]) if len(parts) > 1 else default_tol_h
+    tol_sv = int(parts[2]) if len(parts) > 2 else default_tol_sv
+    return (r, g, b), tol_h, tol_sv
+
+
+def _build_parser():
+    parser = argparse.ArgumentParser(
+        prog="orange_clicker",
+        description="Smart AutoClicker — détecte et clique sur des couleurs ciblées.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""exemples :
+  orange_clicker                                            # Mode GUI (par défaut)
+  orange_clicker --cli --color FF8C00                       # Clic sur orange, plein écran
+  orange_clicker --cli --color FF8C00 --color 00C850:20:80  # 2 couleurs, tolérances custom
+  orange_clicker --cli --color 3478FF --zone 0,0,960,540 --cpm 300 --timer 60
+  orange_clicker --cli --color FF0000 --cpm 200 --jitter 5 --cpm-variation
+""",
+    )
+    parser.add_argument(
+        "--cli", action="store_true",
+        help="Lancer en mode ligne de commande (sans GUI)")
+    parser.add_argument(
+        "--color", metavar="RRGGBB[:tol_h[:tol_sv]]",
+        action="append", dest="raw_colors", default=[],
+        help="Couleur cible en hex (répétable jusqu'à 3 fois). Ex: FF8C00 ou FF8C00:20:80")
+    parser.add_argument(
+        "--zone", metavar="x,y,w,h", default=None,
+        help="Zone de détection en pixels. Défaut : plein écran")
+    parser.add_argument(
+        "--cpm", type=int, default=120,
+        help="Clics par minute (défaut : 120)")
+    parser.add_argument(
+        "--miss", type=float, default=5.0,
+        help="Taux d'erreur en %% (défaut : 5)")
+    parser.add_argument(
+        "--cooldown", type=int, default=300,
+        help="Cooldown par cible en ms (défaut : 300)")
+    parser.add_argument(
+        "--radius", type=int, default=8,
+        help="Rayon minimum de détection en px (défaut : 8)")
+    parser.add_argument(
+        "--timer", type=int, default=0,
+        help="Durée en secondes puis arrêt automatique (0 = infini)")
+    parser.add_argument(
+        "--tol-h", type=int, default=15, dest="tol_h",
+        help="Tolérance teinte appliquée aux couleurs sans tolérance explicite (défaut : 15)")
+    parser.add_argument(
+        "--tol-sv", type=int, default=60, dest="tol_sv",
+        help="Tolérance sat/val appliquée aux couleurs sans tolérance explicite (défaut : 60)")
+    parser.add_argument(
+        "--jitter", type=int, default=0,
+        help="Micro-déplacement ±px autour du centre de la cible (0 = désactivé)")
+    parser.add_argument(
+        "--start-delay", type=int, default=0, dest="start_delay",
+        help="Délai avant le premier clic en secondes (0 = immédiat)")
+    parser.add_argument(
+        "--cpm-variation", action="store_true", dest="cpm_variation",
+        help="Variation de cadence aléatoire ±20%%")
+    parser.add_argument(
+        "--random-pauses", action="store_true", dest="random_pauses",
+        help="Pauses aléatoires spontanées entre les clics")
+    return parser
+
+
+def _run_cli(args):
+    global running, ZONE
+
+    # ── Validation des couleurs ────────────────────────────────────────────────
+    if not args.raw_colors:
+        print("[!] Aucune couleur spécifiée.  Exemple : --color FF8C00")
+        sys.exit(1)
+
+    colors = []
+    for raw in args.raw_colors[:3]:
+        try:
+            rgb, tol_h, tol_sv = _parse_color(raw, args.tol_h, args.tol_sv)
+            colors.append((rgb, tol_h, tol_sv))
+        except Exception as exc:
+            print(f"[!] {exc}")
+            sys.exit(1)
+
+    # ── Zone ──────────────────────────────────────────────────────────────────
+    if args.zone:
+        try:
+            x, y, w, h = (int(v) for v in args.zone.split(","))
+            with zone_lock:
+                ZONE = {"left": x, "top": y, "width": w, "height": h}
+        except ValueError:
+            print("[!] Zone invalide — format attendu : x,y,w,h  (ex: 0,0,1920,1080)")
+            sys.exit(1)
+
+    cfg = CliConfig(
+        colors        = colors,
+        cpm           = args.cpm,
+        miss          = args.miss,
+        cooldown      = args.cooldown,
+        radius        = args.radius,
+        timer         = args.timer,
+        jitter        = args.jitter,
+        start_delay   = args.start_delay,
+        cpm_variation = args.cpm_variation,
+        random_pauses = args.random_pauses,
+    )
+
+    # ── Résumé affiché avant démarrage ─────────────────────────────────────────
+    color_strs = [f"#{r:02X}{g:02X}{b:02X}" for (r, g, b), *_ in colors]
+    zone_str   = (f"{ZONE['left']},{ZONE['top']}  {ZONE['width']}x{ZONE['height']} px")
+    timer_str  = f"{args.timer} s" if args.timer > 0 else "infini"
+    opts = []
+    if args.cpm_variation:  opts.append("variation CPM")
+    if args.jitter > 0:     opts.append(f"jitter ±{args.jitter}px")
+    if args.random_pauses:  opts.append("pauses aléatoires")
+    if args.start_delay > 0: opts.append(f"délai {args.start_delay}s")
+
+    W = 50
+    def row(label, value):
+        line = f"  {label:<14}: {value}"
+        print(f"║{line:<{W}}║")
+
+    print(f"╔{'═' * W}╗")
+    print(f"║{'  Smart AutoClicker  —  CLI mode':<{W}}║")
+    print(f"╠{'═' * W}╣")
+    row("Couleurs",   ", ".join(color_strs))
+    row("Zone",       zone_str)
+    row("CPM",        args.cpm)
+    row("Taux erreur", f"{args.miss:.1f} %")
+    row("Cooldown",   f"{args.cooldown} ms")
+    row("Timer",      timer_str)
+    if opts:
+        row("Options",   ", ".join(opts))
+    print(f"╠{'═' * W}╣")
+    print(f"║{'  Ctrl+C pour arrêter':<{W}}║")
+    print(f"╚{'═' * W}╝\n")
+
+    # ── Arrêt via Ctrl+C ───────────────────────────────────────────────────────
+    def _sigint(sig, frame):
+        global running
+        running = False
+    signal.signal(signal.SIGINT, _sigint)
+
+    running = True
+    clicker_loop(cfg)
+
+
 # ── Point d'entrée ─────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    App().mainloop()
+    _args = _build_parser().parse_args()
+    if _args.cli:
+        _run_cli(_args)
+    else:
+        App().mainloop()

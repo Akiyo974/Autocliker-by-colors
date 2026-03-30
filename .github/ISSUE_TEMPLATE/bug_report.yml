@@ -1,0 +1,75 @@
+name: 🐛 Bug Report
+description: Signaler un comportement anormal ou une erreur
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler ce bug. Plus votre rapport est précis, plus vite il sera résolu.
+
+  - type: input
+    id: version_python
+    attributes:
+      label: Version Python
+      placeholder: "ex : 3.12.2"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Version Windows
+      placeholder: "ex : Windows 11 22H2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode utilisé
+      options:
+        - GUI (interface graphique)
+        - CLI (ligne de commande)
+        - Les deux
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du problème
+      placeholder: Décrivez clairement ce qui se passe de manière inattendue...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Lancer le script avec...
+        2. Cliquer sur...
+        3. Observer l'erreur...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+      placeholder: Que devrait-il se passer normalement ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traceback
+      description: Collez ici le message d'erreur complet si disponible.
+      render: shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: Captures d'écran, commande CLI utilisée, couleur cible, etc.

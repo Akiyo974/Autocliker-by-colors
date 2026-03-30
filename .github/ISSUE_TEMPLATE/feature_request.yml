@@ -1,0 +1,56 @@
+name: 💡 Feature Request
+description: Proposer une nouvelle fonctionnalité ou amélioration
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de votre suggestion ! Consultez la [Roadmap](https://github.com/Akiyo974/Autocliker-by-colors#%EF%B8%8F-roadmap) avant de soumettre.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème ou besoin
+      placeholder: |
+        Ex : "Je dois souvent reconfigurer les mêmes couleurs à chaque session,
+        ce serait pratique de pouvoir sauvegarder mes réglages."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      placeholder: Décrivez comment vous imaginez la fonctionnalité...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      placeholder: Y a-t-il d'autres façons d'atteindre le même objectif ?
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Catégorie
+      options:
+        - 🎨 Interface (GUI)
+        - 🎯 Détection
+        - 🤖 Comportement naturel
+        - 🛠️ Technique / CLI
+        - 📝 Documentation
+        - Autre
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Vérifications préalables
+      options:
+        - label: J'ai vérifié que cette fonctionnalité n'est pas déjà dans la Roadmap du README
+          required: true
+        - label: J'ai vérifié qu'aucune issue similaire n'existe déjà
+          required: true
