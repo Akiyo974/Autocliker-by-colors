@@ -259,36 +259,6 @@ Fait avec ❤️ par **[Akiyo974](https://github.com/Akiyo974)**
 
 </div>
 
-
-
-
----
-
-## 📸 Aperçu
-
-![Interface](https://i.imgur.com/placeholder.png)
-
----
-
-## 🚀 Installation
-
-### Prérequis
-- Python 3.10 ou supérieur
-- Windows (utilise l'API Win32 pour la capture d'écran)
-
-### 1. Cloner le dépôt
-
-```bash
-git clone https://github.com/Akiyo974/Autocliker-by-colors.git
-cd Autocliker-by-colors
-```
-
-### 2. Installer les dépendances
-
-```bash
-pip install opencv-python mss pyautogui numpy pynput
-```
-
 ### 3. Lancer
 
 ```bash
