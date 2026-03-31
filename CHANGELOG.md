@@ -7,10 +7,6 @@ ce projet respecte le [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
-## [Unreleased]
-
----
-
 ## [1.3.0] — 2026-03-30
 
 ### Ajouté
@@ -25,6 +21,7 @@ ce projet respecte le [Semantic Versioning](https://semver.org/lang/fr/).
 - `CONTRIBUTING.md` — guide de contribution
 - `CHANGELOG.md` — historique des versions
 - Templates GitHub : bug report, feature request, PR template, config issues
+- **Packaging `.exe`** : `orange_clicker.spec` PyInstaller — exécutable standalone (~60 Mo) sans Python requis
 
 ### Modifié
 - Section couleur remplacée par un `Notebook` à 3 onglets
