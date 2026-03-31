@@ -18,3 +18,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# PyInstaller
+dist/
+build/
+*.spec.bak
