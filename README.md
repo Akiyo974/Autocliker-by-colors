@@ -62,6 +62,12 @@ python orange_clicker.py
 python orange_clicker.py --cli --color FF8C00 --cpm 150
 ```
 
+### Ou sans Python — télécharger le `.exe`
+
+[![Download](https://img.shields.io/github/v/release/Akiyo974/Autocliker-by-colors?label=T%C3%A9l%C3%A9charger%20.exe&logo=github&color=22c55e)](https://github.com/Akiyo974/Autocliker-by-colors/releases/latest)
+
+> Aucune installation requise. Téléchargez `OrangeClicker.exe` dans les [Releases](https://github.com/Akiyo974/Autocliker-by-colors/releases), double-cliquez pour le mode GUI ou lancez en CLI depuis un terminal.
+
 ---
 
 ## 🖥️ Mode GUI
@@ -186,7 +192,7 @@ python orange_clicker.py --cli --color 3478FF \
 
 ### 🛠️ Technique
 - [x] **Mode CLI** — pilotage complet sans interface graphique
-- [ ] **Packaging `.exe`** — exécutable standalone via PyInstaller
+- [x] **Packaging `.exe`** — exécutable standalone via PyInstaller (sans Python requis)
 - [ ] **Support multi-écrans** — choisir le moniteur cible
 
 ---
@@ -195,8 +201,9 @@ python orange_clicker.py --cli --color 3478FF \
 
 ```
 Autocliker-by-colors/
-├── orange_clicker.py   # Script principal (GUI + CLI)
-├── requirements.txt    # Dépendances Python
+├── orange_clicker.py      # Script principal (GUI + CLI)
+├── orange_clicker.spec    # Spec PyInstaller → build du .exe
+├── requirements.txt       # Dépendances Python
 ├── README.md
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
@@ -253,30 +260,7 @@ Fait avec ❤️ par **[Akiyo974](https://github.com/Akiyo974)**
 </div>
 
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
-![Platform](https://img.shields.io/badge/Platform-Windows-blue?logo=windows)
-![License](https://img.shields.io/badge/License-MIT-green)
 
----
-
-## ✨ Fonctionnalités
-
-| Fonctionnalité | Description |
-|---|---|
-| 🎨 **Multi-couleurs** | Jusqu'à 3 couleurs simultanées, chacune avec sa propre tolérance |
-| 🖱️ **Sélection de couleur** | Sélecteur classique ou pipette écran par onglet couleur |
-| 📐 **Zone de détection** | Dessinez un rectangle sur l'écran pour limiter la zone analysée |
-| ⚡ **Clics / minute** | Réglez la cadence de 1 à 6000 CPM (défaut : 120 — naturel) |
-| 🎲 **Taux d'erreur** | Simule des ratés humains (défaut : 5 %) pour un comportement crédible |
-| ⏱️ **Timer** | Arrêt automatique après X secondes (optionnel) |
-| 🔁 **Cooldown par cible** | Empêche de recliquer la même zone avant qu'elle disparaisse |
-| ⌨️ **Raccourci clavier** | `Ctrl+Shift+S` pour démarrer/arrêter depuis n'importe quelle fenêtre |
-| 🌙 **Dark mode** | Thème sombre activable en un clic |
-| 👁️ **Overlay preview** | Fenêtre OpenCV montrant les cibles détectées en temps réel (activable) |
-| 📊 **Variation de cadence** | CPM légèrement aléatoire ±20 % (activable) |
-| 🎯 **Micro-déplacement** | Décalage aléatoire du point de clic ±N px (activable) |
-| ⏳ **Délai de démarrage** | Compte à rebours configurable avant le premier clic (activable) |
-| ☕ **Pauses aléatoires** | Pauses spontanées entre les clics pour simuler une distraction (activable) |
 
 ---
 
