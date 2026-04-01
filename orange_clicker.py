@@ -25,9 +25,11 @@ Options activables (section Options) :
 """
 
 import argparse
+import json
 import signal
 import sys
 import time
+from pathlib import Path
 import random
 import threading
 import tkinter as tk
@@ -520,6 +522,15 @@ class App(tk.Tk):
                                      command=self._toggle)
         self.btn_toggle.grid(row=0, column=0, sticky="ew")
 
+        # ── Profils ────────────────────────────────────────────────────────────
+        frm_profiles = ttk.Frame(frm_ctrl)
+        frm_profiles.grid(row=1, column=0, sticky="ew", pady=(4, 0))
+        frm_profiles.columnconfigure((0, 1), weight=1)
+        ttk.Button(frm_profiles, text="💾  Sauvegarder profil",
+                   command=self._save_profile).grid(row=0, column=0, sticky="ew", padx=(0, 2))
+        ttk.Button(frm_profiles, text="📂  Charger profil",
+                   command=self._load_profile).grid(row=0, column=1, sticky="ew", padx=(2, 0))
+
         # ── Statut ─────────────────────────────────────────────────────────────
         self.lbl_status = ttk.Label(self, text="Prêt.  |  Raccourci : Ctrl+Shift+S",
                                     anchor="w", relief="sunken", padding=(4, 2))
@@ -579,6 +590,123 @@ class App(tk.Tk):
                   command=lambda v, lbl=lbl_sv: lbl.config(
                       text=str(int(float(v))))).grid(row=5, column=1, sticky="w")
         lbl_sv.grid(row=5, column=2, padx=(4, 0))
+
+    # ── Profils JSON ───────────────────────────────────────────────────────────
+
+    def _save_profile(self):
+        from tkinter import filedialog
+        path = filedialog.asksaveasfilename(
+            title="Sauvegarder le profil",
+            defaultextension=".json",
+            filetypes=[("Profil JSON", "*.json"), ("Tous les fichiers", "*.*")],
+        )
+        if not path:
+            return
+        with zone_lock:
+            z = dict(ZONE)
+        data = {
+            "version": "1.4",
+            "colors": [
+                {
+                    "rgb":    list(slot.rgb),
+                    "tol_h":  slot.var_tol_h.get(),
+                    "tol_sv": slot.var_tol_sv.get(),
+                    "active": slot.active,
+                }
+                for slot in self._slots
+            ],
+            "zone": z,
+            "cpm":      self.var_cpm.get(),
+            "miss":     self.var_miss.get(),
+            "cooldown": self.var_cooldown.get(),
+            "radius":   self.var_radius.get(),
+            "timer_on":  self.var_timer_on.get(),
+            "timer_val": self.var_timer_val.get(),
+            "options": {
+                "dark_mode":      self.var_dark_mode.get(),
+                "preview":        self.var_opt_preview.get(),
+                "cpm_variation":  self.var_opt_cpm_var.get(),
+                "jitter":         self.var_opt_jitter.get(),
+                "jitter_px":      self.var_jitter_px.get(),
+                "start_delay":    self.var_opt_start_d.get(),
+                "start_delay_val": self.var_start_delay.get(),
+                "random_pauses":  self.var_opt_pauses.get(),
+            },
+        }
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            self._set_status(f"Profil sauvegardé → {Path(path).name}")
+        except Exception as exc:
+            self._set_status(f"[!] Erreur sauvegarde : {exc}")
+
+    def _load_profile(self):
+        from tkinter import filedialog
+        path = filedialog.askopenfilename(
+            title="Charger un profil",
+            filetypes=[("Profil JSON", "*.json"), ("Tous les fichiers", "*.*")],
+        )
+        if not path:
+            return
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as exc:
+            self._set_status(f"[!] Fichier invalide : {exc}")
+            return
+        global ZONE
+        # Couleurs
+        for i, cdata in enumerate(data.get("colors", [])[:3]):
+            slot = self._slots[i]
+            slot.rgb    = tuple(cdata["rgb"])
+            slot.var_tol_h.set(cdata.get("tol_h", 15))
+            slot.var_tol_sv.set(cdata.get("tol_sv", 60))
+            slot.active = cdata.get("active", i == 0)
+        self._refresh_all_color_previews()
+        # Zone
+        z = data.get("zone")
+        if z:
+            with zone_lock:
+                ZONE = z
+            self._refresh_zone_label()
+        # Paramètres
+        if "cpm" in data:
+            self.var_cpm.set(data["cpm"])
+            self.lbl_cpm.config(text=str(data["cpm"]))
+        if "miss" in data:
+            self.var_miss.set(data["miss"])
+            self.lbl_miss.config(text=f"{data['miss']} %")
+        if "cooldown" in data:
+            self.var_cooldown.set(data["cooldown"])
+        if "radius" in data:
+            self.var_radius.set(data["radius"])
+        if "timer_on" in data:
+            self.var_timer_on.set(data["timer_on"])
+            self._refresh_timer_state()
+        if "timer_val" in data:
+            self.var_timer_val.set(data["timer_val"])
+        # Options
+        opts = data.get("options", {})
+        if "dark_mode" in opts:
+            self.var_dark_mode.set(opts["dark_mode"])
+            self._toggle_theme()
+        if "preview" in opts:
+            self.var_opt_preview.set(opts["preview"])
+        if "cpm_variation" in opts:
+            self.var_opt_cpm_var.set(opts["cpm_variation"])
+        if "jitter" in opts:
+            self.var_opt_jitter.set(opts["jitter"])
+            self._refresh_jitter_state()
+        if "jitter_px" in opts:
+            self.var_jitter_px.set(opts["jitter_px"])
+        if "start_delay" in opts:
+            self.var_opt_start_d.set(opts["start_delay"])
+            self._refresh_startdelay_state()
+        if "start_delay_val" in opts:
+            self.var_start_delay.set(opts["start_delay_val"])
+        if "random_pauses" in opts:
+            self.var_opt_pauses.set(opts["random_pauses"])
+        self._set_status(f"Profil chargé ← {Path(path).name}")
 
     # ── Thème ──────────────────────────────────────────────────────────────────
 

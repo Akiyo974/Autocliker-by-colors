@@ -7,6 +7,16 @@ ce projet respecte le [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [1.4.0] — 2026-03-31
+
+### Ajouté
+- **Profils sauvegardables** : boutons « Sauvegarder profil » et « Charger profil » dans l'interface
+- Export de tous les réglages en JSON (couleurs, zone, CPM, options naturalisation…)
+- Import depuis un fichier `.json` avec application immédiate de tous les paramètres
+- Format versionné (`version: "1.4"`) pour compatibilité future
+
+---
+
 ## [1.3.0] — 2026-03-30
 
 ### Ajouté
@@ -73,7 +83,8 @@ ce projet respecte le [Semantic Versioning](https://semver.org/lang/fr/).
 - Simulation de clics via `pyautogui`
 - Script terminal basique (sans GUI)
 
-[Unreleased]: https://github.com/Akiyo974/Autocliker-by-colors/compare/v1.3.0...HEAD
+[1.4.0]: https://github.com/Akiyo974/Autocliker-by-colors/compare/v1.3.0...v1.4.0
+[Unreleased]: https://github.com/Akiyo974/Autocliker-by-colors/compare/v1.4.0...HEAD
 [1.3.0]: https://github.com/Akiyo974/Autocliker-by-colors/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Akiyo974/Autocliker-by-colors/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Akiyo974/Autocliker-by-colors/compare/v1.0.0...v1.1.0

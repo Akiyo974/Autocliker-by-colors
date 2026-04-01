@@ -177,7 +177,7 @@ python orange_clicker.py --cli --color 3478FF \
 - [x] **Dark mode** — thème sombre optionnel
 - [x] **Overlay de prévisualisation** — cibles cerclées en vert en temps réel
 - [ ] **Historique des sessions** — tableau récapitulatif (clics, CPM moyen, durée)
-- [ ] **Profils sauvegardables** — exporter/importer les réglages en JSON
+- [x] **Profils sauvegardables** — exporter/importer les réglages en JSON
 
 ### 🎯 Détection
 - [x] **Multi-couleurs** — jusqu'à 3 couleurs en parallèle
